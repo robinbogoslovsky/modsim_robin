@@ -1,0 +1,1899 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[     83767,       1891]
+NotebookOptionsPosition[     83124,       1872]
+NotebookOutlinePosition[     83577,       1889]
+CellTagsIndexPosition[     83534,       1886]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"plotData", "=", 
+   RowBox[{"<|", "|>"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"plotData", "[", "\"\<humans\>\"", "]"}], "=", 
+   RowBox[{"{", "}"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"plotData", "[", "\"\<zombies\>\"", "]"}], "=", 
+   RowBox[{"{", "}"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"plotData", "[", "\"\<panicked\>\"", "]"}], "=", 
+    RowBox[{"{", "}"}]}], ";"}], 
+  StyleBox["\[IndentingNewLine]",
+   FontWeight->"Plain"]}], "\[IndentingNewLine]", 
+ RowBox[{
+  StyleBox["DynamicModule",
+   FontWeight->"Plain"], 
+  StyleBox["[",
+   FontWeight->"Plain"], 
+  RowBox[{
+   StyleBox[
+    RowBox[{"{", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"numHumans", "=", "50"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"numZombies", "=", "1"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"numPolice", "=", "3"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"numWeapons", "=", "5"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"gridSize", "=", "60"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"infection", "=", "0.5"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"movement", "=", "0.8"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"fleeDistance", "=", "2"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"policeShootCooldown", "=", "2"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"policeShootChance", "=", "0.6"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"exitCooldown", "=", "50"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"policeBullets", "=", "10"}], ",", "\[IndentingNewLine]", 
+      "currentAgents", ",", "\[IndentingNewLine]", "shootTimers", ",", 
+      "\[IndentingNewLine]", 
+      RowBox[{"running", "=", "False"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"exitPoint", "=", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"gridSize", "/", "2"}], "+", "2", "-", 
+          RowBox[{"gridSize", "/", "2"}], "+", "2"}], ",", "1"}], "}"}]}], 
+      ",", "\[IndentingNewLine]", 
+      RowBox[{"exitTimer", "=", "0"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"panicRadius", "=", "20"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"combatChance", "=", "0.7"}], ",", "\[IndentingNewLine]", 
+      "weapons", ",", 
+      RowBox[{"step", "=", "0"}]}], "}"}],
+    FontWeight->"Plain"], 
+   StyleBox[",",
+    FontWeight->"Plain"], 
+   StyleBox["\[IndentingNewLine]",
+    FontWeight->"Plain"], 
+   StyleBox["\[IndentingNewLine]",
+    FontWeight->"Plain"], 
+   RowBox[{
+    StyleBox[
+     RowBox[{"populationData", "=", 
+      RowBox[{"{", "}"}]}],
+     FontWeight->"Plain"], 
+    StyleBox[";",
+     FontWeight->"Plain"], 
+    StyleBox["\[IndentingNewLine]",
+     FontWeight->"Plain"], 
+    StyleBox["\[IndentingNewLine]",
+     FontWeight->"Plain"], 
+    StyleBox[
+     RowBox[{
+      RowBox[{"checkCollision", "[", 
+       RowBox[{"newPos_", ",", "agents_", ",", "currentAgent_"}], "]"}], ":=", 
+      RowBox[{"AnyTrue", "[", 
+       RowBox[{"agents", ",", 
+        RowBox[{"agent", "|->", 
+         RowBox[{
+          RowBox[{"agent", "=!=", "currentAgent"}], "&&", 
+          RowBox[{
+           RowBox[{"EuclideanDistance", "[", 
+            RowBox[{
+             RowBox[{"agent", "[", "\"\<pos\>\"", "]"}], ",", "newPos"}], 
+            "]"}], "<", "1"}]}]}]}], "]"}]}],
+     FontWeight->"Plain"], 
+    StyleBox[";",
+     FontWeight->"Plain"], 
+    StyleBox["\[IndentingNewLine]",
+     FontWeight->"Plain"], 
+    StyleBox[
+     RowBox[{"weapons", "=", 
+      RowBox[{"Table", "[", 
+       RowBox[{
+        RowBox[{"<|", 
+         RowBox[{
+          RowBox[{"\"\<pos\>\"", "->", 
+           RowBox[{"RandomInteger", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{"1", ",", "gridSize"}], "}"}], ",", "2"}], "]"}]}], ",", 
+          RowBox[{"\"\<taken\>\"", "->", "False"}]}], "|>"}], ",", 
+        RowBox[{"{", "numWeapons", "}"}]}], "]"}]}],
+     FontWeight->"Plain"], 
+    StyleBox[";",
+     FontWeight->"Plain"], 
+    StyleBox["\[IndentingNewLine]",
+     FontWeight->"Plain"], 
+    StyleBox["\[IndentingNewLine]",
+     FontWeight->"Plain"], 
+    StyleBox[
+     RowBox[{
+      RowBox[{"zombieStep", "[", 
+       RowBox[{"agents_", ",", "timers_", ",", "inf_", ",", "mov_"}], "]"}], 
+      "\[IndentingNewLine]", ":=", 
+      RowBox[{"Module", "[", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"updatedAgents", "=", "agents"}], ",", 
+          RowBox[{"newTimers", "=", "timers"}], ",", 
+          RowBox[{"policeIndex", "=", "1"}]}], "}"}], ",", 
+        RowBox[{
+         RowBox[{"Do", "[", 
+          RowBox[{
+           RowBox[{"Module", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"agent", "=", 
+                RowBox[{"updatedAgents", "[", 
+                 RowBox[{"[", "i", "]"}], "]"}]}], ",", "newPos"}], "}"}], 
+             ",", 
+             RowBox[{
+              RowBox[{"Switch", "[", 
+               RowBox[{
+                RowBox[{"agent", "[", "\"\<type\>\"", "]"}], ",", 
+                "\"\<human\>\"", ",", 
+                RowBox[{"Module", "[", 
+                 RowBox[{
+                  RowBox[{"{", 
+                   RowBox[{
+                    RowBox[{"zombies", "=", 
+                    RowBox[{"Select", "[", 
+                    RowBox[{"updatedAgents", ",", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                    "\"\<zombie\>\""}], "&"}]}], "]"}]}], ",", 
+                    RowBox[{"nearbyHumans", "=", 
+                    RowBox[{"Select", "[", 
+                    RowBox[{"updatedAgents", ",", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                    "\"\<human\>\""}], "&&", 
+                    RowBox[{
+                    RowBox[{"EuclideanDistance", "[", 
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<pos\>\"", "]"}], ",", 
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}]}], "]"}], "<", 
+                    "panicRadius"}]}], "&"}]}], "]"}]}]}], "}"}], ",", 
+                  RowBox[{
+                   RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Length", "[", "zombies", "]"}], ">", "0"}], ",", 
+                    "\[IndentingNewLine]", 
+                    RowBox[{"With", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"nearestZombie", "=", 
+                    RowBox[{"First", "[", 
+                    RowBox[{"SortBy", "[", 
+                    RowBox[{"zombies", ",", 
+                    RowBox[{
+                    RowBox[{"EuclideanDistance", "[", 
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<pos\>\"", "]"}], ",", 
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}]}], "]"}], 
+                    "&"}]}], "]"}], "]"}]}], "}"}], ",", 
+                    RowBox[{"(*", 
+                    RowBox[{"Check", " ", "for", " ", "panic"}], "*)"}], 
+                    "\[IndentingNewLine]", "\[IndentingNewLine]", 
+                    RowBox[{
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"EuclideanDistance", "[", 
+                    RowBox[{
+                    RowBox[{"nearestZombie", "[", "\"\<pos\>\"", "]"}], ",", 
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}]}], "]"}], "<", 
+                    "panicRadius"}], ",", "\[IndentingNewLine]", 
+                    "\[IndentingNewLine]", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<courage\>\"", "]"}], "<", 
+                    "0.7"}], "||", 
+                    RowBox[{"!", 
+                    RowBox[{"agent", "[", "\"\<armed\>\"", "]"}]}]}], ",", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<panicked\>\"", "]"}], "=", 
+                    "True"}], ";", "\[IndentingNewLine]", 
+                    RowBox[{"Do", "[", 
+                    RowBox[{
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"h", "[", "\"\<courage\>\"", "]"}], "<", "0.7"}], 
+                    ",", 
+                    RowBox[{
+                    RowBox[{"h", "[", "\"\<panicked\>\"", "]"}], "=", 
+                    "True"}]}], "]"}], ",", 
+                    RowBox[{"{", 
+                    RowBox[{"h", ",", "nearbyHumans"}], "}"}]}], "]"}]}]}], 
+                    "]"}]}], "]"}], ";", "\[IndentingNewLine]", 
+                    RowBox[{"(*", 
+                    RowBox[{"Handle", " ", "movement"}], "*)"}], 
+                    "\[IndentingNewLine]", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<panicked\>\"", "]"}], "&&", 
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<type\>\"", "]"}], "==", 
+                    "\"\<human\>\""}]}], ",", "\[IndentingNewLine]", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"exitTimer", "<=", "0"}], "&&", 
+                    RowBox[{
+                    RowBox[{"EuclideanDistance", "[", 
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}], ",", 
+                    "exitPoint"}], "]"}], "<", "1.5"}]}], ",", 
+                    RowBox[{
+                    RowBox[{"updatedAgents", "=", 
+                    RowBox[{"Delete", "[", 
+                    RowBox[{"updatedAgents", ",", "i"}], "]"}]}], ";", 
+                    "\[IndentingNewLine]", 
+                    RowBox[{"exitTimer", "=", "exitCooldown"}]}], ",", 
+                    "\[IndentingNewLine]", 
+                    RowBox[{
+                    RowBox[{"newPos", "=", 
+                    RowBox[{"Map", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Max", "[", 
+                    RowBox[{"1", ",", 
+                    RowBox[{"Min", "[", 
+                    RowBox[{"gridSize", ",", "#"}], "]"}]}], "]"}], "&"}], 
+                    ",", 
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}], "+", 
+                    RowBox[{"2", "*", 
+                    RowBox[{"Sign", "[", 
+                    RowBox[{"exitPoint", "-", 
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}]}], "]"}]}]}]}],
+                     "]"}]}], ";", "\[IndentingNewLine]", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{"!", 
+                    RowBox[{"checkCollision", "[", 
+                    RowBox[{"newPos", ",", "updatedAgents", ",", "agent"}], 
+                    "]"}]}], ",", 
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}], "=", 
+                    "newPos"}]}], "]"}]}]}], "]"}], ",", 
+                    RowBox[{"(*", 
+                    RowBox[{"Non", "-", 
+                    RowBox[{"panicked", " ", "combat", " ", "behavior"}]}], 
+                    "*)"}], "\[IndentingNewLine]", "\[IndentingNewLine]", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<armed\>\"", "]"}], "&&", 
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<courage\>\"", "]"}], ">=", 
+                    "0.7"}]}], ",", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"EuclideanDistance", "[", 
+                    RowBox[{
+                    RowBox[{"nearestZombie", "[", "\"\<pos\>\"", "]"}], ",", 
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}]}], "]"}], "<", 
+                    "2"}], ",", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"RandomReal", "[", "]"}], "<", "combatChance"}], 
+                    ",", 
+                    RowBox[{"updatedAgents", "=", 
+                    RowBox[{"Delete", "[", 
+                    RowBox[{"updatedAgents", ",", 
+                    RowBox[{
+                    RowBox[{"Position", "[", 
+                    RowBox[{"updatedAgents", ",", "nearestZombie"}], "]"}], 
+                    "[", 
+                    RowBox[{"[", "1", "]"}], "]"}]}], "]"}]}], ",", 
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<type\>\"", "]"}], "=", 
+                    "\"\<zombie\>\""}]}], "]"}]}], "]"}]}], "]"}]}], 
+                    "]"}]}]}], "]"}]}], "]"}], ";", "\[IndentingNewLine]", 
+                   "\[IndentingNewLine]", 
+                   RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{"!", 
+                    RowBox[{"agent", "[", "\"\<armed\>\"", "]"}]}], ",", 
+                    RowBox[{"With", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"availableWeapons", "=", 
+                    RowBox[{"Select", "[", 
+                    RowBox[{"weapons", ",", 
+                    RowBox[{
+                    RowBox[{"!", 
+                    RowBox[{"#", "[", "\"\<taken\>\"", "]"}]}], "&"}]}], 
+                    "]"}]}], "}"}], ",", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Length", "[", "availableWeapons", "]"}], ">", 
+                    "0"}], ",", 
+                    RowBox[{"With", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"nearestWeapon", "=", 
+                    RowBox[{"First", "[", 
+                    RowBox[{"SortBy", "[", 
+                    RowBox[{"availableWeapons", ",", 
+                    RowBox[{
+                    RowBox[{"EuclideanDistance", "[", 
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<pos\>\"", "]"}], ",", 
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}]}], "]"}], 
+                    "&"}]}], "]"}], "]"}]}], "}"}], ",", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"EuclideanDistance", "[", 
+                    RowBox[{
+                    RowBox[{"nearestWeapon", "[", "\"\<pos\>\"", "]"}], ",", 
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}]}], "]"}], "<", 
+                    "1"}], ",", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<armed\>\"", "]"}], "=", 
+                    "True"}], ";", "\[IndentingNewLine]", 
+                    RowBox[{
+                    RowBox[{"nearestWeapon", "[", "\"\<taken\>\"", "]"}], "=",
+                     "True"}]}]}], "]"}]}], "]"}]}], "]"}]}], "]"}]}], 
+                    "]"}]}]}], "]"}], ",", "\[IndentingNewLine]", 
+                "\[IndentingNewLine]", "\"\<zombie\>\"", ",", 
+                RowBox[{"Module", "[", 
+                 RowBox[{
+                  RowBox[{"{", 
+                   RowBox[{"targets", "=", 
+                    RowBox[{"Select", "[", 
+                    RowBox[{"updatedAgents", ",", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                    "\"\<human\>\""}], "||", 
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                    "\"\<police\>\""}]}], "&"}]}], "]"}]}], "}"}], ",", 
+                  RowBox[{"If", "[", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{"Length", "[", "targets", "]"}], ">", "0"}], ",", 
+                    RowBox[{"With", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"nearest", "=", 
+                    RowBox[{"First", "[", 
+                    RowBox[{"SortBy", "[", 
+                    RowBox[{"targets", ",", 
+                    RowBox[{
+                    RowBox[{"EuclideanDistance", "[", 
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<pos\>\"", "]"}], ",", 
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}]}], "]"}], 
+                    "&"}]}], "]"}], "]"}]}], "}"}], ",", 
+                    "\[IndentingNewLine]", "\[IndentingNewLine]", 
+                    RowBox[{
+                    RowBox[{"newPos", "=", 
+                    RowBox[{"Map", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Max", "[", 
+                    RowBox[{"1", ",", 
+                    RowBox[{"Min", "[", 
+                    RowBox[{"gridSize", ",", "#"}], "]"}]}], "]"}], "&"}], 
+                    ",", 
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}], "+", 
+                    RowBox[{"Sign", "[", 
+                    RowBox[{
+                    RowBox[{"nearest", "[", "\"\<pos\>\"", "]"}], "-", 
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}]}], "]"}]}]}], 
+                    "]"}]}], ";", "\[IndentingNewLine]", 
+                    "\[IndentingNewLine]", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{"!", 
+                    RowBox[{"checkCollision", "[", 
+                    RowBox[{"newPos", ",", "updatedAgents", ",", "agent"}], 
+                    "]"}]}], ",", 
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}], "=", 
+                    "newPos"}]}], "]"}]}]}], "]"}]}], "]"}]}], "]"}], ",", 
+                "\"\<police\>\"", ",", "\[IndentingNewLine]", 
+                "\[IndentingNewLine]", 
+                RowBox[{"Module", "[", 
+                 RowBox[{
+                  RowBox[{"{", 
+                   RowBox[{"zombies", "=", 
+                    RowBox[{"Select", "[", 
+                    RowBox[{"updatedAgents", ",", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                    "\"\<zombie\>\""}], "&"}]}], "]"}]}], "}"}], ",", 
+                  RowBox[{
+                   RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<bullets\>\"", "]"}], ">", 
+                    "0"}], ",", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Length", "[", "zombies", "]"}], ">", "0"}], "&&", 
+                    RowBox[{
+                    RowBox[{"newTimers", "[", 
+                    RowBox[{"[", "policeIndex", "]"}], "]"}], "<=", "0"}]}], 
+                    ",", 
+                    RowBox[{"With", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"nearestZombie", "=", 
+                    RowBox[{"First", "[", 
+                    RowBox[{"SortBy", "[", 
+                    RowBox[{"zombies", ",", 
+                    RowBox[{
+                    RowBox[{"EuclideanDistance", "[", 
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<pos\>\"", "]"}], ",", 
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}]}], "]"}], 
+                    "&"}]}], "]"}], "]"}]}], "}"}], ",", 
+                    RowBox[{
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"EuclideanDistance", "[", 
+                    RowBox[{
+                    RowBox[{"nearestZombie", "[", "\"\<pos\>\"", "]"}], ",", 
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}]}], "]"}], "<=",
+                     "8"}], "&&", 
+                    RowBox[{
+                    RowBox[{"RandomReal", "[", "]"}], "<", 
+                    "policeShootChance"}]}], ",", 
+                    RowBox[{
+                    RowBox[{"updatedAgents", "=", 
+                    RowBox[{"Drop", "[", 
+                    RowBox[{"updatedAgents", ",", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"Position", "[", 
+                    RowBox[{"updatedAgents", ",", "nearestZombie"}], "]"}], 
+                    "[", 
+                    RowBox[{"[", 
+                    RowBox[{"1", ",", "1"}], "]"}], "]"}], "}"}]}], "]"}]}], 
+                    ";", "\[IndentingNewLine]", 
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<bullets\>\"", "]"}], "-=", 
+                    "1"}]}]}], "]"}], ";", "\[IndentingNewLine]", 
+                    RowBox[{
+                    RowBox[{"newTimers", "[", 
+                    RowBox[{"[", "policeIndex", "]"}], "]"}], "=", 
+                    "policeShootCooldown"}]}]}], "]"}]}], "]"}], ",", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<type\>\"", "]"}], "=", 
+                    "\"\<human\>\""}], ";", "\[IndentingNewLine]", 
+                    RowBox[{"agent", "=", 
+                    RowBox[{"KeyDrop", "[", 
+                    RowBox[{"agent", ",", "\"\<bullets\>\""}], "]"}]}]}]}], 
+                    "]"}], ";", "\[IndentingNewLine]", "\[IndentingNewLine]", 
+                   RowBox[{"With", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"zombies", "=", 
+                    RowBox[{"Select", "[", 
+                    RowBox[{"updatedAgents", ",", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                    "\"\<zombie\>\""}], "&"}]}], "]"}]}], "}"}], ",", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"AnyTrue", "[", 
+                    RowBox[{"zombies", ",", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"EuclideanDistance", "[", 
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<pos\>\"", "]"}], ",", 
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}]}], "]"}], "<=",
+                     "1.5"}], "&"}]}], "]"}], "&&", 
+                    RowBox[{
+                    RowBox[{"RandomReal", "[", "]"}], "<", "inf"}]}], ",", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<type\>\"", "]"}], "=", 
+                    "\"\<zombie\>\""}], ";", "\[IndentingNewLine]", 
+                    RowBox[{"agent", "=", 
+                    RowBox[{"KeyDrop", "[", 
+                    RowBox[{"agent", ",", "\"\<bullets\>\""}], "]"}]}]}]}], 
+                    "]"}]}], "]"}], ";", "\[IndentingNewLine]", 
+                   "\[IndentingNewLine]", 
+                   RowBox[{
+                    RowBox[{"newTimers", "[", 
+                    RowBox[{"[", "policeIndex", "]"}], "]"}], "=", 
+                    RowBox[{"Max", "[", 
+                    RowBox[{"0", ",", 
+                    RowBox[{
+                    RowBox[{"newTimers", "[", 
+                    RowBox[{"[", "policeIndex", "]"}], "]"}], "-", "1"}]}], 
+                    "]"}]}], ";", "\[IndentingNewLine]", 
+                   RowBox[{"policeIndex", "++"}]}]}], "]"}]}], "]"}], ";", 
+              "\[IndentingNewLine]", "\[IndentingNewLine]", 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"RandomReal", "[", "]"}], "<", "mov"}], ",", 
+                RowBox[{
+                 RowBox[{"newPos", "=", 
+                  RowBox[{"Map", "[", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{"Max", "[", 
+                    RowBox[{"1", ",", 
+                    RowBox[{"Min", "[", 
+                    RowBox[{"gridSize", ",", "#"}], "]"}]}], "]"}], "&"}], 
+                    ",", 
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}], "+", 
+                    RowBox[{"RandomChoice", "[", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"0", ",", "1"}], "}"}], ",", 
+                    RowBox[{"{", 
+                    RowBox[{"0", ",", 
+                    RowBox[{"-", "1"}]}], "}"}], ",", 
+                    RowBox[{"{", 
+                    RowBox[{"1", ",", "0"}], "}"}], ",", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"-", "1"}], ",", "0"}], "}"}]}], "}"}], "]"}]}]}],
+                    "]"}]}], ";", "\[IndentingNewLine]", 
+                 "\[IndentingNewLine]", 
+                 RowBox[{"If", "[", 
+                  RowBox[{
+                   RowBox[{"!", 
+                    RowBox[{"checkCollision", "[", 
+                    RowBox[{"newPos", ",", "updatedAgents", ",", "agent"}], 
+                    "]"}]}], ",", 
+                   RowBox[{
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}], "=", 
+                    "newPos"}]}], "]"}]}]}], "]"}], ";", 
+              "\[IndentingNewLine]", "\[IndentingNewLine]", 
+              RowBox[{"If", "[", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"agent", "[", "\"\<type\>\"", "]"}], "==", 
+                 "\"\<human\>\""}], ",", 
+                RowBox[{"With", "[", 
+                 RowBox[{
+                  RowBox[{"{", 
+                   RowBox[{"zombies", "=", 
+                    RowBox[{"Select", "[", 
+                    RowBox[{"updatedAgents", ",", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                    "\"\<zombie\>\""}], "&"}]}], "]"}]}], "}"}], ",", 
+                  "\[IndentingNewLine]", "\[IndentingNewLine]", 
+                  RowBox[{"If", "[", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{"AnyTrue", "[", 
+                    RowBox[{"zombies", ",", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"EuclideanDistance", "[", 
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<pos\>\"", "]"}], ",", 
+                    RowBox[{"agent", "[", "\"\<pos\>\"", "]"}]}], "]"}], "<=",
+                     "1.5"}], "&"}]}], "]"}], "&&", 
+                    RowBox[{
+                    RowBox[{"RandomReal", "[", "]"}], "<", "inf"}]}], ",", 
+                    RowBox[{
+                    RowBox[{"agent", "[", "\"\<type\>\"", "]"}], "=", 
+                    "\"\<zombie\>\""}]}], "]"}]}], "]"}]}], "]"}], ";", 
+              "\[IndentingNewLine]", "\[IndentingNewLine]", 
+              RowBox[{
+               RowBox[{"updatedAgents", "[", 
+                RowBox[{"[", "i", "]"}], "]"}], "=", "agent"}]}]}], "]"}], 
+           ",", 
+           RowBox[{"{", 
+            RowBox[{"i", ",", 
+             RowBox[{"Length", "[", "updatedAgents", "]"}]}], "}"}]}], "]"}], 
+         ";", "\[IndentingNewLine]", 
+         RowBox[{"exitTimer", "=", 
+          RowBox[{"Max", "[", 
+           RowBox[{"0", ",", 
+            RowBox[{"exitTimer", "-", "1"}]}], "]"}]}], ";", 
+         "\[IndentingNewLine]", 
+         RowBox[{"{", 
+          RowBox[{"updatedAgents", ",", "newTimers"}], "}"}]}]}], "]"}]}],
+     FontWeight->"Plain"], 
+    StyleBox[";",
+     FontWeight->"Plain"], 
+    StyleBox["\[IndentingNewLine]",
+     FontWeight->"Plain"], 
+    StyleBox["\[IndentingNewLine]",
+     FontWeight->"Plain"], 
+    StyleBox[
+     RowBox[{"currentAgents", "=", 
+      RowBox[{"Join", "[", 
+       RowBox[{
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{"<|", 
+           RowBox[{
+            RowBox[{"\"\<type\>\"", "->", "\"\<human\>\""}], ",", 
+            RowBox[{"\"\<pos\>\"", "->", 
+             RowBox[{"RandomInteger", "[", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{"1", ",", "gridSize"}], "}"}], ",", "2"}], "]"}]}], 
+            ",", 
+            RowBox[{"\"\<courage\>\"", "->", 
+             RowBox[{"RandomReal", "[", "]"}]}], ",", 
+            RowBox[{"\"\<armed\>\"", "->", "False"}], ",", 
+            RowBox[{"\"\<panicked\>\"", "->", "False"}]}], "|>"}], ",", 
+          RowBox[{"{", "numHumans", "}"}]}], "]"}], ",", 
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{"<|", 
+           RowBox[{
+            RowBox[{"\"\<type\>\"", "->", "\"\<zombie\>\""}], ",", 
+            RowBox[{"\"\<pos\>\"", "->", 
+             RowBox[{"RandomInteger", "[", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{"1", ",", "gridSize"}], "}"}], ",", "2"}], "]"}]}]}], 
+           "|>"}], ",", 
+          RowBox[{"{", "numZombies", "}"}]}], "]"}], ",", 
+        "\[IndentingNewLine]", "\[IndentingNewLine]", 
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{"<|", 
+           RowBox[{
+            RowBox[{"\"\<type\>\"", "->", "\"\<police\>\""}], ",", 
+            RowBox[{"\"\<pos\>\"", "->", 
+             RowBox[{"RandomInteger", "[", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{"1", ",", "gridSize"}], "}"}], ",", "2"}], "]"}]}], 
+            ",", 
+            RowBox[{"\"\<bullets\>\"", "->", "policeBullets"}]}], "|>"}], ",", 
+          RowBox[{"{", "numPolice", "}"}]}], "]"}]}], "]"}]}],
+     FontWeight->"Plain"], 
+    StyleBox[";",
+     FontWeight->"Plain"], 
+    StyleBox["\[IndentingNewLine]",
+     FontWeight->"Plain"], 
+    StyleBox[
+     RowBox[{"shootTimers", "=", 
+      RowBox[{"ConstantArray", "[", 
+       RowBox[{"0", ",", "numPolice"}], "]"}]}],
+     FontWeight->"Plain"], 
+    StyleBox[";",
+     FontWeight->"Plain"], 
+    StyleBox["\[IndentingNewLine]",
+     FontWeight->"Plain"], 
+    StyleBox["\[IndentingNewLine]",
+     FontWeight->"Plain"], 
+    StyleBox["\[IndentingNewLine]",
+     FontWeight->"Plain"], 
+    StyleBox[
+     RowBox[{
+      StyleBox[
+       RowBox[{"(", "*"}]], 
+      RowBox[{
+      "All", " ", "diagram", " ", "were", " ", "generated", " ", "using", " ",
+        "AI", " ", "for", " ", "fastened", " ", "results"}], 
+      StyleBox[
+       RowBox[{"*", ")"}]]}],
+     FontWeight->"Plain"], 
+    StyleBox["\[IndentingNewLine]",
+     FontWeight->"Plain"], 
+    StyleBox["\[IndentingNewLine]",
+     FontWeight->"Plain"], 
+    RowBox[{"Column", "[", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"Dynamic", "[", 
+        RowBox[{"ListLinePlot", "[", 
+         RowBox[{
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"plotData", "[", "\"\<humans\>\"", "]"}], ",", 
+            RowBox[{"plotData", "[", "\"\<zombies\>\"", "]"}]}], "}"}], ",", 
+          RowBox[{"PlotStyle", "->", 
+           RowBox[{"{", 
+            RowBox[{"Green", ",", "Red"}], "}"}]}], ",", 
+          RowBox[{"PlotLegends", "->", 
+           RowBox[{"{", 
+            RowBox[{"\"\<Humans\>\"", ",", "\"\<Zombies\>\""}], "}"}]}], ",", 
+          RowBox[{"PlotRange", "->", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{"1", ",", 
+               RowBox[{"Max", "[", 
+                RowBox[{"1", ",", 
+                 RowBox[{"Length", "[", 
+                  RowBox[{"plotData", "[", "\"\<humans\>\"", "]"}], "]"}]}], 
+                "]"}]}], "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"0", ",", 
+               RowBox[{"numHumans", "+", "5"}]}], "}"}]}], "}"}]}], ",", 
+          RowBox[{"AxesLabel", "->", 
+           RowBox[{"{", 
+            RowBox[{"\"\<Time Steps\>\"", ",", "\"\<Population\>\""}], 
+            "}"}]}]}], "]"}], "]"}], ",", 
+       RowBox[{"Dynamic", "[", 
+        RowBox[{"ListLinePlot", "[", 
+         RowBox[{"infectionsPerStep", ",", 
+          RowBox[{"PlotRange", "->", "All"}], ",", 
+          RowBox[{"PlotLabel", "->", "\"\<Infection Rate\>\""}]}], "]"}], 
+        "]"}], ",", "\[IndentingNewLine]", 
+       RowBox[{"Dynamic", "[", 
+        RowBox[{"ArrayPlot", "[", 
+         RowBox[{"presenceMap", ",", 
+          RowBox[{"ColorFunction", "->", "\"\<TemperatureMap\>\""}]}], "]"}], 
+        "]"}], ",", 
+       RowBox[{"Dynamic", "[", 
+        RowBox[{"ListLinePlot", "[", 
+         RowBox[{
+          RowBox[{"Table", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"Length", "@", 
+              RowBox[{"Select", "[", 
+               RowBox[{"currentAgents", ",", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                   "\"\<human\>\""}], "&&", 
+                  RowBox[{"#", "[", "\"\<panicked\>\"", "]"}]}], "&"}]}], 
+               "]"}]}], "/", 
+             RowBox[{"Length", "@", 
+              RowBox[{"Select", "[", 
+               RowBox[{"currentAgents", ",", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                  "\"\<human\>\""}], "&"}]}], "]"}]}]}], ",", 
+            RowBox[{"{", "step", "}"}]}], "]"}], ",", 
+          RowBox[{
+          "PlotLabel", "->", "\"\<Proportion of Humans Panicked\>\""}], ",", 
+          RowBox[{"PlotRange", "->", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{"0", ",", "All"}], "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"0", ",", "1"}], "}"}]}], "}"}]}]}], "]"}], "]"}], ",", 
+       RowBox[{"(*", 
+        RowBox[{
+         RowBox[{"Dynamic", "[", 
+          RowBox[{"ListLinePlot", "[", 
+           RowBox[{
+            RowBox[{"plotData", "[", "\"\<panicked\>\"", "]"}], ",", 
+            RowBox[{"PlotStyle", "->", "Orange"}], ",", 
+            RowBox[{"PlotLabel", "->", "\"\<Number of Panicked Humans\>\""}], 
+            ",", 
+            RowBox[{"PlotRange", "->", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{"1", ",", 
+                 RowBox[{"Max", "[", 
+                  RowBox[{"1", ",", 
+                   RowBox[{"Length", "[", 
+                    RowBox[{"plotData", "[", "\"\<panicked\>\"", "]"}], 
+                    "]"}]}], "]"}]}], "}"}], ",", 
+               RowBox[{"{", 
+                RowBox[{"0", ",", "numHumans"}], "}"}]}], "}"}]}], ",", 
+            RowBox[{"AxesLabel", "->", 
+             RowBox[{"{", 
+              RowBox[{"\"\<Time Steps\>\"", ",", "\"\<Count\>\""}], "}"}]}], 
+            ",", 
+            RowBox[{"GridLines", "->", "Automatic"}]}], "]"}], "]"}], ","}], 
+        "*)"}], 
+       RowBox[{"_Dynamic", "[", 
+        RowBox[{"ListPlot", "[", 
+         RowBox[{
+          RowBox[{"Map", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"#", "[", "\"\<pos\>\"", "]"}], "&"}], ",", 
+            "currentAgents"}], "]"}], ",", 
+          RowBox[{"PlotStyle", "->", 
+           RowBox[{"Map", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"Switch", "[", 
+               RowBox[{
+                RowBox[{"#", "[", "\"\<type\>\"", "]"}], ",", "\"\<human\>\"",
+                 ",", 
+                RowBox[{"If", "[", 
+                 RowBox[{
+                  RowBox[{"#", "[", "\"\<armed\>\"", "]"}], ",", 
+                  RowBox[{"Darker", "[", "Green", "]"}], ",", "Green"}], 
+                 "]"}], ",", "\"\<zombie\>\"", ",", "Red", ",", 
+                "\"\<police\>\"", ",", "Blue"}], "]"}], "&"}], ",", 
+             "currentAgents"}], "]"}]}], ",", 
+          RowBox[{"PlotRange", "->", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{"0", ",", "gridSize"}], "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"0", ",", "gridSize"}], "}"}]}], "}"}]}], ",", 
+          RowBox[{"AspectRatio", "->", "1"}]}], "]"}], "]"}], ",", 
+       RowBox[{"Dynamic", "[", 
+        RowBox[{"If", "[", 
+         RowBox[{"running", ",", 
+          RowBox[{
+           RowBox[{"AppendTo", "[", 
+            RowBox[{
+             RowBox[{"plotData", "[", "\"\<humans\>\"", "]"}], ",", 
+             RowBox[{"Length", "@", 
+              RowBox[{"Select", "[", 
+               RowBox[{"currentAgents", ",", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                  "\"\<human\>\""}], "&"}]}], "]"}]}]}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"AppendTo", "[", 
+            RowBox[{
+             RowBox[{"plotData", "[", "\"\<zombies\>\"", "]"}], ",", 
+             RowBox[{"Length", "@", 
+              RowBox[{"Select", "[", 
+               RowBox[{"currentAgents", ",", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                  "\"\<zombie\>\""}], "&"}]}], "]"}]}]}], "]"}], ";", 
+           "\[IndentingNewLine]", 
+           RowBox[{"AppendTo", "[", 
+            RowBox[{"infectionsPerStep", ",", 
+             RowBox[{
+              RowBox[{"Length", "@", 
+               RowBox[{"Select", "[", 
+                RowBox[{"currentAgents", ",", 
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                   "\"\<zombie\>\""}], "&"}]}], "]"}]}], "/", 
+              RowBox[{"(", 
+               RowBox[{"Length", "@", "currentAgents"}], ")"}]}]}], "]"}], 
+           ";", "\[IndentingNewLine]", 
+           RowBox[{"AppendTo", "[", 
+            RowBox[{
+             RowBox[{"plotData", "[", "\"\<panicked\>\"", "]"}], ",", 
+             RowBox[{"Length", "@", 
+              RowBox[{"Select", "[", 
+               RowBox[{"currentAgents", ",", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                   "\"\<human\>\""}], "&&", 
+                  RowBox[{"#", "[", "\"\<panicked\>\"", "]"}]}], "&"}]}], 
+               "]"}]}]}], "]"}], ";", "\[IndentingNewLine]", 
+           RowBox[{"With", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{"pos", "=", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"Floor", "[", 
+                  RowBox[{"#", "[", "\"\<pos\>\"", "]"}], "]"}], "&"}], "/@", 
+                RowBox[{"Select", "[", 
+                 RowBox[{"currentAgents", ",", 
+                  RowBox[{
+                   RowBox[{
+                    RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                    "\"\<human\>\""}], "&"}]}], "]"}]}]}], "}"}], ",", 
+             RowBox[{
+              RowBox[{"presenceMap", "[", 
+               RowBox[{"[", 
+                RowBox[{
+                 RowBox[{"pos", "[", 
+                  RowBox[{"[", 
+                   RowBox[{"All", ",", "1"}], "]"}], "]"}], ",", 
+                 RowBox[{"pos", "[", 
+                  RowBox[{"[", 
+                   RowBox[{"All", ",", "2"}], "]"}], "]"}]}], "]"}], "]"}], 
+              "++"}]}], "]"}]}]}], "]"}], "]"}], ",", 
+       RowBox[{"Grid", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{"\"\<Humans:\>\"", ",", 
+             RowBox[{"Row", "[", 
+              RowBox[{"{", 
+               RowBox[{
+                RowBox[{"Slider", "[", 
+                 RowBox[{
+                  RowBox[{"Dynamic", "[", "numHumans", "]"}], ",", 
+                  RowBox[{"{", 
+                   RowBox[{"1", ",", "50", ",", "1"}], "}"}]}], "]"}], ",", 
+                "\"\<  \>\"", ",", 
+                RowBox[{"Dynamic", "[", "numHumans", "]"}]}], "}"}], "]"}]}], 
+            "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"\"\<Zombies:\>\"", ",", 
+             RowBox[{"Row", "[", 
+              RowBox[{"{", 
+               RowBox[{
+                RowBox[{"Slider", "[", 
+                 RowBox[{
+                  RowBox[{"Dynamic", "[", "numZombies", "]"}], ",", 
+                  RowBox[{"{", 
+                   RowBox[{"1", ",", "20", ",", "1"}], "}"}]}], "]"}], ",", 
+                "\"\<  \>\"", ",", 
+                RowBox[{"Dynamic", "[", "numZombies", "]"}]}], "}"}], "]"}]}],
+             "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"\"\<Police:\>\"", ",", 
+             RowBox[{"Row", "[", 
+              RowBox[{"{", 
+               RowBox[{
+                RowBox[{"Slider", "[", 
+                 RowBox[{
+                  RowBox[{"Dynamic", "[", "numPolice", "]"}], ",", 
+                  RowBox[{"{", 
+                   RowBox[{"1", ",", "10", ",", "1"}], "}"}]}], "]"}], ",", 
+                "\"\<  \>\"", ",", 
+                RowBox[{"Dynamic", "[", "numPolice", "]"}]}], "}"}], "]"}]}], 
+            "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"\"\<Weapons:\>\"", ",", 
+             RowBox[{"Row", "[", 
+              RowBox[{"{", 
+               RowBox[{
+                RowBox[{"Slider", "[", 
+                 RowBox[{
+                  RowBox[{"Dynamic", "[", "numWeapons", "]"}], ",", 
+                  RowBox[{"{", 
+                   RowBox[{"1", ",", "10", ",", "1"}], "}"}]}], "]"}], ",", 
+                "\"\<  \>\"", ",", 
+                RowBox[{"Dynamic", "[", "numWeapons", "]"}]}], "}"}], "]"}]}],
+             "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"\"\<Police Bullets:\>\"", ",", 
+             RowBox[{"Row", "[", 
+              RowBox[{"{", 
+               RowBox[{
+                RowBox[{"Slider", "[", 
+                 RowBox[{
+                  RowBox[{"Dynamic", "[", "policeBullets", "]"}], ",", 
+                  RowBox[{"{", 
+                   RowBox[{"1", ",", "30", ",", "1"}], "}"}]}], "]"}], ",", 
+                "\"\<  \>\"", ",", 
+                RowBox[{"Dynamic", "[", "policeBullets", "]"}]}], "}"}], 
+              "]"}]}], "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"\"\<Infection Rate:\>\"", ",", 
+             RowBox[{"Row", "[", 
+              RowBox[{"{", 
+               RowBox[{
+                RowBox[{"Slider", "[", 
+                 RowBox[{
+                  RowBox[{"Dynamic", "[", "infection", "]"}], ",", 
+                  RowBox[{"{", 
+                   RowBox[{"0", ",", "1", ",", "0.1"}], "}"}]}], "]"}], ",", 
+                "\"\<  \>\"", ",", 
+                RowBox[{"Dynamic", "[", "infection", "]"}]}], "}"}], "]"}]}], 
+            "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"\"\<Movement Rate:\>\"", ",", 
+             RowBox[{"Row", "[", 
+              RowBox[{"{", 
+               RowBox[{
+                RowBox[{"Slider", "[", 
+                 RowBox[{
+                  RowBox[{"Dynamic", "[", "movement", "]"}], ",", 
+                  RowBox[{"{", 
+                   RowBox[{"0", ",", "1", ",", "0.1"}], "}"}]}], "]"}], ",", 
+                "\"\<  \>\"", ",", 
+                RowBox[{"Dynamic", "[", "movement", "]"}]}], "}"}], "]"}]}], 
+            "}"}]}], "}"}], ",", 
+         RowBox[{"Alignment", "->", "Left"}], ",", 
+         RowBox[{"Spacings", "->", 
+          RowBox[{"{", 
+           RowBox[{"2", ",", "1"}], "}"}]}]}], "]"}], ",", 
+       RowBox[{"Row", "[", 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"Button", "[", 
+           RowBox[{"\"\<Reset\>\"", ",", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"plotData", "[", "\"\<humans\>\"", "]"}], "=", 
+              RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+             RowBox[{
+              RowBox[{"plotData", "[", "\"\<zombies\>\"", "]"}], "=", 
+              RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+             RowBox[{
+              RowBox[{"plotData", "[", "\"\<panicked\>\"", "]"}], "=", 
+              RowBox[{"{", "}"}]}], ";", "\[IndentingNewLine]", 
+             RowBox[{"weapons", "=", 
+              RowBox[{"Table", "[", 
+               RowBox[{
+                RowBox[{"<|", 
+                 RowBox[{
+                  RowBox[{"\"\<pos\>\"", "->", 
+                   RowBox[{"RandomInteger", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"1", ",", "gridSize"}], "}"}], ",", "2"}], 
+                    "]"}]}], ",", 
+                  RowBox[{"\"\<taken\>\"", "->", "False"}]}], "|>"}], ",", 
+                RowBox[{"{", "numWeapons", "}"}]}], "]"}]}], ";", 
+             "\[IndentingNewLine]", 
+             RowBox[{"currentAgents", "=", 
+              RowBox[{"Join", "[", 
+               RowBox[{
+                RowBox[{"Table", "[", 
+                 RowBox[{
+                  RowBox[{"<|", 
+                   RowBox[{
+                    RowBox[{"\"\<type\>\"", "->", "\"\<human\>\""}], ",", 
+                    RowBox[{"\"\<pos\>\"", "->", 
+                    RowBox[{"RandomInteger", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"1", ",", "gridSize"}], "}"}], ",", "2"}], 
+                    "]"}]}], ",", 
+                    RowBox[{"\"\<courage\>\"", "->", 
+                    RowBox[{"RandomReal", "[", "]"}]}], ",", 
+                    RowBox[{"\"\<armed\>\"", "->", "False"}], ",", 
+                    RowBox[{"\"\<panicked\>\"", "->", "False"}]}], "|>"}], 
+                  ",", 
+                  RowBox[{"{", "numHumans", "}"}]}], "]"}], ",", 
+                RowBox[{"Table", "[", 
+                 RowBox[{
+                  RowBox[{"<|", 
+                   RowBox[{
+                    RowBox[{"\"\<type\>\"", "->", "\"\<zombie\>\""}], ",", 
+                    RowBox[{"\"\<pos\>\"", "->", 
+                    RowBox[{"RandomInteger", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"1", ",", "gridSize"}], "}"}], ",", "2"}], 
+                    "]"}]}]}], "|>"}], ",", 
+                  RowBox[{"{", "numZombies", "}"}]}], "]"}], ",", 
+                RowBox[{"Table", "[", 
+                 RowBox[{
+                  RowBox[{"<|", 
+                   RowBox[{
+                    RowBox[{"\"\<type\>\"", "->", "\"\<police\>\""}], ",", 
+                    RowBox[{"\"\<pos\>\"", "->", 
+                    RowBox[{"RandomInteger", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"1", ",", "gridSize"}], "}"}], ",", "2"}], 
+                    "]"}]}], ",", 
+                    RowBox[{"\"\<bullets\>\"", "->", "policeBullets"}]}], 
+                   "|>"}], ",", 
+                  RowBox[{"{", "numPolice", "}"}]}], "]"}]}], "]"}]}], ";", 
+             "\[IndentingNewLine]", 
+             RowBox[{"shootTimers", "=", 
+              RowBox[{"ConstantArray", "[", 
+               RowBox[{"0", ",", "numPolice"}], "]"}]}], ";", 
+             "\[IndentingNewLine]", 
+             RowBox[{"exitTimer", "=", "0"}]}]}], "]"}], ",", 
+          RowBox[{"Button", "[", 
+           RowBox[{
+            RowBox[{"Dynamic", "[", 
+             RowBox[{"If", "[", 
+              RowBox[{"running", ",", "\"\<Stop\>\"", ",", "\"\<Start\>\""}], 
+              "]"}], "]"}], ",", 
+            RowBox[{"running", "=", 
+             RowBox[{"!", "running"}]}]}], "]"}]}], "}"}], "]"}], ",", 
+       RowBox[{"Dynamic", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"If", "[", 
+           RowBox[{"running", ",", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"{", 
+               RowBox[{"currentAgents", ",", "shootTimers"}], "}"}], "=", 
+              RowBox[{"zombieStep", "[", 
+               RowBox[{
+               "currentAgents", ",", "shootTimers", ",", "infection", ",", 
+                "movement"}], "]"}]}], ";", "\[IndentingNewLine]", 
+             RowBox[{"step", "++"}]}]}], "]"}], ";", "\[IndentingNewLine]", 
+          RowBox[{"Graphics", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"PointSize", "[", "0.02", "]"}], ",", 
+              RowBox[{"{", 
+               RowBox[{"Black", ",", 
+                RowBox[{"Rectangle", "[", 
+                 RowBox[{
+                  RowBox[{"exitPoint", "-", 
+                   RowBox[{"{", 
+                    RowBox[{"0.5", ",", "0.5"}], "}"}]}], ",", 
+                  RowBox[{"exitPoint", "+", 
+                   RowBox[{"{", 
+                    RowBox[{"0.5", ",", "0.5"}], "}"}]}]}], "]"}]}], "}"}], 
+              ",", 
+              RowBox[{"{", 
+               RowBox[{"Orange", ",", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"Point", "[", 
+                   RowBox[{"#", "[", "\"\<pos\>\"", "]"}], "]"}], "&"}], "/@", 
+                 RowBox[{"Select", "[", 
+                  RowBox[{"weapons", ",", 
+                   RowBox[{
+                    RowBox[{"!", 
+                    RowBox[{"#", "[", "\"\<taken\>\"", "]"}]}], "&"}]}], 
+                  "]"}]}]}], "}"}], ",", 
+              RowBox[{"{", 
+               RowBox[{"Green", ",", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"Point", "[", 
+                   RowBox[{"#", "[", "\"\<pos\>\"", "]"}], "]"}], "&"}], "/@", 
+                 RowBox[{"Select", "[", 
+                  RowBox[{"currentAgents", ",", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                    "\"\<human\>\""}], "&&", 
+                    RowBox[{"!", 
+                    RowBox[{"#", "[", "\"\<armed\>\"", "]"}]}], "&&", 
+                    RowBox[{"!", 
+                    RowBox[{"#", "[", "\"\<panicked\>\"", "]"}]}]}], "&"}]}], 
+                  "]"}]}]}], "}"}], ",", 
+              RowBox[{"{", 
+               RowBox[{"Gray", ",", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"Point", "[", 
+                   RowBox[{"#", "[", "\"\<pos\>\"", "]"}], "]"}], "&"}], "/@", 
+                 RowBox[{"Select", "[", 
+                  RowBox[{"currentAgents", ",", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                    "\"\<human\>\""}], "&&", 
+                    RowBox[{"!", 
+                    RowBox[{"#", "[", "\"\<armed\>\"", "]"}]}], "&&", 
+                    RowBox[{"#", "[", "\"\<panicked\>\"", "]"}]}], "&"}]}], 
+                  "]"}]}]}], "}"}], ",", 
+              RowBox[{"{", 
+               RowBox[{
+                RowBox[{"Darker", "[", "Green", "]"}], ",", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"Point", "[", 
+                   RowBox[{"#", "[", "\"\<pos\>\"", "]"}], "]"}], "&"}], "/@", 
+                 RowBox[{"Select", "[", 
+                  RowBox[{"currentAgents", ",", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                    "\"\<human\>\""}], "&&", 
+                    RowBox[{"#", "[", "\"\<armed\>\"", "]"}]}], "&"}]}], 
+                  "]"}]}]}], "}"}], ",", 
+              RowBox[{"{", 
+               RowBox[{"Red", ",", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"Point", "[", 
+                   RowBox[{"#", "[", "\"\<pos\>\"", "]"}], "]"}], "&"}], "/@", 
+                 RowBox[{"Select", "[", 
+                  RowBox[{"currentAgents", ",", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                    "\"\<zombie\>\""}], "&"}]}], "]"}]}]}], "}"}], ",", 
+              RowBox[{"{", 
+               RowBox[{"Blue", ",", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"Point", "[", 
+                   RowBox[{"#", "[", "\"\<pos\>\"", "]"}], "]"}], "&"}], "/@", 
+                 RowBox[{"Select", "[", 
+                  RowBox[{"currentAgents", ",", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{"#", "[", "\"\<type\>\"", "]"}], "==", 
+                    "\"\<police\>\""}], "&"}]}], "]"}]}]}], "}"}]}], "}"}], 
+            ",", 
+            RowBox[{"PlotRange", "->", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{"0", ",", 
+                 RowBox[{"gridSize", "+", "1"}]}], "}"}], ",", 
+               RowBox[{"{", 
+                RowBox[{"0", ",", 
+                 RowBox[{"gridSize", "+", "1"}]}], "}"}]}], "}"}]}], ",", 
+            RowBox[{"Frame", "->", "True"}]}], "]"}]}], ",", 
+         RowBox[{"UpdateInterval", "->", "0.01"}]}], "]"}]}], "}"}], 
+     "]"}]}]}], "]"}], "\[IndentingNewLine]"}], "Input",
+ CellChangeTimes->{{3.9424396454067554`*^9, 3.942439656492529*^9}, 
+   3.9424397290213146`*^9, 3.9424398318883705`*^9, 3.9424751200081577`*^9, {
+   3.9424757746424713`*^9, 3.9424757986634083`*^9}, 3.9424761349640007`*^9, 
+   3.9424762877323914`*^9, 3.942476345325861*^9, 3.9424764670255795`*^9, 
+   3.942476630813818*^9, 3.9424767233841*^9, 3.94247682388558*^9, 
+   3.9424768638718357`*^9, {3.942476894096798*^9, 3.9424769323400745`*^9}, 
+   3.9424770301368027`*^9, {3.94247724057432*^9, 3.9424772664822407`*^9}, {
+   3.9424773240562*^9, 3.9424773392575607`*^9}, 3.942607953155731*^9, {
+   3.9426087923113194`*^9, 3.942608792383312*^9}, {3.9426096051734905`*^9, 
+   3.9426096131609993`*^9}, {3.9426097688912506`*^9, 3.942609777948122*^9}, {
+   3.942609982341873*^9, 3.9426100001502914`*^9}, {3.9426102395221977`*^9, 
+   3.942610243324915*^9}, {3.9426104094560432`*^9, 3.9426104491958103`*^9}, {
+   3.94270372427664*^9, 3.94270374568528*^9}, 3.942703808126301*^9, 
+   3.942703873095888*^9, 3.942703985827841*^9, 3.942704096437332*^9, 
+   3.9427054837571087`*^9, {3.942705550799513*^9, 3.942705573899248*^9}, 
+   3.942705695738796*^9, {3.942705740048704*^9, 3.942705782161581*^9}, 
+   3.9427058243336296`*^9, 3.942705858582649*^9, {3.942705918917179*^9, 
+   3.9427059358516083`*^9}, {3.942706045563654*^9, 3.942706061884081*^9}, {
+   3.9427062528854885`*^9, 3.942706270809454*^9}, {3.942708096857115*^9, 
+   3.942708100019026*^9}, {3.94270816755682*^9, 3.9427081842064056`*^9}, {
+   3.9427082251169033`*^9, 3.9427082336161537`*^9}, 3.9427083037051315`*^9, {
+   3.942708347950899*^9, 3.942708357992241*^9}, {3.9427084985254154`*^9, 
+   3.9427085362570553`*^9}, {3.942708627486042*^9, 3.942708639189905*^9}, {
+   3.942708706194357*^9, 3.9427087483336487`*^9}, 3.9427088337860985`*^9, {
+   3.942708868787512*^9, 3.942708870094839*^9}, {3.942708916824888*^9, 
+   3.9427089216016273`*^9}, {3.9427089599084625`*^9, 
+   3.9427089611150055`*^9}, {3.942708998832197*^9, 3.9427089989164295`*^9}, {
+   3.942709036165289*^9, 3.94270903731435*^9}, {3.9427090865100937`*^9, 
+   3.942709088531124*^9}, {3.9427091914861794`*^9, 3.942709192600239*^9}, {
+   3.9427092313042946`*^9, 3.942709231390085*^9}, {3.9427092828698425`*^9, 
+   3.9427092935741997`*^9}, {3.942709356740364*^9, 3.9427093575283623`*^9}, 
+   3.9427094348560905`*^9, {3.942709536828005*^9, 3.942709544224201*^9}, 
+   3.9427095788363914`*^9, 3.9427096133149242`*^9, {3.9427096568213024`*^9, 
+   3.9427096609992027`*^9}, 3.9427096933422375`*^9, {3.942710370178171*^9, 
+   3.9427103894324665`*^9}, {3.942710431721012*^9, 3.9427104634305954`*^9}, {
+   3.942710506067604*^9, 3.942710511410494*^9}, 3.9427105455589733`*^9, {
+   3.9427106007771893`*^9, 3.9427106190835724`*^9}, {3.9427107512022552`*^9, 
+   3.9427107768736343`*^9}, {3.9427108430729904`*^9, 3.942710875823494*^9}, {
+   3.9427109281912994`*^9, 3.9427109347579403`*^9}, {3.9427110352913017`*^9, 
+   3.9427110467862034`*^9}, 3.942711444174301*^9, 3.9427332918365765`*^9, 
+   3.9427337242598686`*^9, {3.9427349723015385`*^9, 3.9427350328378696`*^9}, {
+   3.9427350709129047`*^9, 3.942735248593231*^9}, {3.9427391340459137`*^9, 
+   3.9427392019203243`*^9}, {3.9427392427720757`*^9, 
+   3.9427392751449566`*^9}, {3.9427394700951347`*^9, 3.942739504311407*^9}, {
+   3.9427395741577816`*^9, 3.942739588409481*^9}, 3.9427396265905685`*^9, {
+   3.942739695191805*^9, 3.942739709148432*^9}, 3.942739808386732*^9, {
+   3.942739962768675*^9, 3.942739965393141*^9}, {3.942740088584072*^9, 
+   3.942740105062111*^9}, {3.9427414748935146`*^9, 
+   3.942741508115221*^9}},ExpressionUUID->"d63a3396-4595-3841-8d33-\
+c8d19564cd8e"],
+
+Cell[BoxData[
+ DynamicModuleBox[{$CellContext`numHumans$$ = 50, $CellContext`numZombies$$ = 
+  1, $CellContext`numPolice$$ = 3, $CellContext`numWeapons$$ = 
+  5, $CellContext`gridSize$$ = 60, $CellContext`infection$$ = 
+  0.5, $CellContext`movement$$ = 0.8, $CellContext`fleeDistance$$ = 
+  2, $CellContext`policeShootCooldown$$ = 
+  2, $CellContext`policeShootChance$$ = 0.6, $CellContext`exitCooldown$$ = 
+  50, $CellContext`policeBullets$$ = 
+  10, $CellContext`currentAgents$$ = {<|
+   "type" -> "human", "pos" -> {8, 3}, "courage" -> 0.7035319963620288, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {29, 38}, "courage" -> 0.8561742058620991, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {14, 39}, "courage" -> 0.9335879694109059, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {44, 41}, "courage" -> 0.18054039946719458`, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {27, 57}, "courage" -> 0.6478789479352656, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {57, 52}, "courage" -> 0.18209548587949653`, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {55, 56}, "courage" -> 0.6091112420777973, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {37, 52}, "courage" -> 0.45491304401182164`, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {42, 54}, "courage" -> 0.26945939369964567`, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {18, 2}, "courage" -> 0.013837219113227883`, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {1, 2}, "courage" -> 0.07161557394647766, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {18, 41}, "courage" -> 0.7547564241016977, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {48, 50}, "courage" -> 0.01938893587216617, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {1, 1}, "courage" -> 0.424091513260787, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {36, 50}, "courage" -> 0.5871123402300575, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {46, 57}, "courage" -> 0.8990763771419896, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {4, 12}, "courage" -> 0.3808286451641294, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {14, 4}, "courage" -> 0.3241898361889859, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {15, 56}, "courage" -> 0.29440486039886227`, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {6, 5}, "courage" -> 0.9124715705183601, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {4, 3}, "courage" -> 0.7643428572100552, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {55, 58}, "courage" -> 0.06485023943604262, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {13, 5}, "courage" -> 0.07381234154637473, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {34, 57}, "courage" -> 0.3251101182750553, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {8, 4}, "courage" -> 0.7622362235729692, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {38, 54}, "courage" -> 0.6018926869114769, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {22, 54}, "courage" -> 0.9246994957185135, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {13, 2}, "courage" -> 0.5408045946736908, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {5, 1}, "courage" -> 0.6370847977897369, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {9, 3}, "courage" -> 0.18915363557558873`, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {5, 4}, "courage" -> 0.3863522324446811, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {9, 2}, "courage" -> 0.4021302585078388, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {15, 1}, "courage" -> 0.9710200732444558, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {1, 40}, "courage" -> 0.6385812166176636, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {57, 26}, "courage" -> 0.5803001928725187, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {51, 50}, "courage" -> 0.5820692004470183, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {1, 18}, "courage" -> 0.7684507878822977, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {11, 19}, "courage" -> 0.46272256241077825`, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {11, 38}, "courage" -> 0.7816813211977391, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {18, 37}, "courage" -> 0.31951074535780233`, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {33, 46}, "courage" -> 0.041294375032359776`, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {56, 31}, "courage" -> 0.9491479946800538, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {3, 1}, "courage" -> 0.06133034832575923, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {2, 4}, "courage" -> 0.5529437562669082, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "human", "pos" -> {2, 1}, "courage" -> 0.36435966570363876`, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {4, 1}, "courage" -> 0.3451920635643648, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {2, 5}, "courage" -> 0.09295411288438027, 
+    "armed" -> False, "panicked" -> True|>, <|
+   "type" -> "human", "pos" -> {1, 57}, "courage" -> 0.42933082579660353`, 
+    "armed" -> False, "panicked" -> False|>, <|
+   "type" -> "police", "pos" -> {20, 10}, "bullets" -> 10|>, <|
+   "type" -> "police", "pos" -> {29, 16}, "bullets" -> 9|>, <|
+   "type" -> "police", "pos" -> {48, 47}, "bullets" -> 
+    10|>}, $CellContext`shootTimers$$ = {0, 0, 0}, $CellContext`running$$ = 
+  False, $CellContext`exitPoint$$ = {4, 1}, $CellContext`exitTimer$$ = 
+  0, $CellContext`panicRadius$$ = 20, $CellContext`combatChance$$ = 
+  0.7, $CellContext`weapons$$ = {<|"pos" -> {31, 27}, "taken" -> False|>, <|
+   "pos" -> {55, 12}, "taken" -> False|>, <|
+   "pos" -> {45, 35}, "taken" -> False|>, <|
+   "pos" -> {60, 52}, "taken" -> False|>, <|
+   "pos" -> {36, 6}, "taken" -> False|>}, $CellContext`step$$ = 48}, 
+  TagBox[GridBox[{
+     {
+      DynamicBox[ToBoxes[
+        ListLinePlot[{
+          $CellContext`plotData["humans"], 
+          $CellContext`plotData["zombies"]}, PlotStyle -> {Green, Red}, 
+         PlotLegends -> {"Humans", "Zombies"}, PlotRange -> {{1, 
+            Max[1, 
+             Length[
+              $CellContext`plotData["humans"]]]}, {
+           0, $CellContext`numHumans$$ + 5}}, 
+         AxesLabel -> {"Time Steps", "Population"}], StandardForm],
+       ImageSizeCache->{
+        244.393330078125, {38.91551451847532, 44.07425475285032}}]},
+     {
+      DynamicBox[ToBoxes[
+        ListLinePlot[$CellContext`infectionsPerStep, PlotRange -> All, 
+         PlotLabel -> "Infection Rate"], StandardForm],
+       ImageSizeCache->{162., {55.46793585951256, 60.62667609388756}}]},
+     {
+      DynamicBox[ToBoxes[
+        ArrayPlot[$CellContext`presenceMap, ColorFunction -> 
+         "TemperatureMap"], StandardForm],
+       ImageSizeCache->{162., {78.29254988281251, 83.4512901171875}}]},
+     {
+      DynamicBox[ToBoxes[
+        ListLinePlot[
+         Table[Length[
+            Select[$CellContext`currentAgents$$, And[#["type"] == "human", 
+              #["panicked"]]& ]]/Length[
+           Select[$CellContext`currentAgents$$, #["type"] == 
+            "human"& ]], {$CellContext`step$$}], PlotLabel -> 
+         "Proportion of Humans Panicked", PlotRange -> {{0, All}, {0, 1}}], 
+        StandardForm],
+       ImageSizeCache->{162., {55.71181451948795, 60.870554753862955`}}]},
+     {
+      RowBox[{"_Dynamic", "[", 
+       GraphicsBox[{{}, 
+         InterpretationBox[{
+           TagBox[
+            TagBox[
+             {RGBColor[0, 0, 1], PointSize[0.011000000000000001`], 
+              AbsoluteThickness[2], PointBox[CompressedData["
+1:eJxtk80OATEUhRsrSwtLCywsRCYIIgRjDON34xEk1l6hj+wRkH6nSW9MMvnS
+2+ntOaedzuN1f9acc7Pv+2N4qjywD1eBvmA8hVu4gwe+y+EJXlO6G1S9MPU9
+NOtdHWawDXuG41SHdMV+2q8LS+r49qXR894Ejpg/U2+l+7mL+V79+2lducT+
+Wif963Q+6qGfJ5+YywCqr/QNoc5T+SnfDVymfvyR8cTom8Mm1DlLxwJqvfwp
+J/lrwJnpp3PS/dK5cL+ib/ksoPybnOM+0qP9MjPmfsfc5UP5oC/61L1Xvsql
+91+f139R5R+gv0S2
+               "]]},
+             Annotation[#, "Charting`Private`Tag#1"]& ],
+            {
+            "WolframDynamicHighlight", <|
+             "Label" -> {"XYLabel"}, "Ball" -> {"IndicatedBall"}|>}], 
+           StyleBox[
+            DynamicBox[(Charting`HighlightActionBox["DynamicHighlight", {}, 
+              Slot["HighlightElements"], 
+              Slot["LayoutOptions"], 
+              Slot["Meta"], 
+              Charting`HighlightActionFunction["DynamicHighlight", {{
+                 Annotation[{
+                   Directive[
+                    PointSize[0.011000000000000001`], 
+                    AbsoluteThickness[2], 
+                    RGBColor[0, 0, 1]], 
+                   Point[CompressedData["
+1:eJxtk80OATEUhRsrSwtLCywsRCYIIgRjDON34xEk1l6hj+wRkH6nSW9MMvnS
+2+ntOaedzuN1f9acc7Pv+2N4qjywD1eBvmA8hVu4gwe+y+EJXlO6G1S9MPU9
+NOtdHWawDXuG41SHdMV+2q8LS+r49qXR894Ejpg/U2+l+7mL+V79+2lducT+
+Wif963Q+6qGfJ5+YywCqr/QNoc5T+SnfDVymfvyR8cTom8Mm1DlLxwJqvfwp
+J/lrwJnpp3PS/dK5cL+ib/ksoPybnOM+0qP9MjPmfsfc5UP5oC/61L1Xvsql
+91+f139R5R+gv0S2
+                    "]]}, "Charting`Private`Tag#1"]}}, <|
+               "HighlightElements" -> <|
+                 "Label" -> {"XYLabel"}, "Ball" -> {"IndicatedBall"}|>, 
+                "LayoutOptions" -> <|
+                 "PanelPlotLayout" -> <||>, 
+                  "PlotRange" -> {{0., 60.}, {0., 60.}}, 
+                  "Frame" -> {{False, False}, {False, False}}, 
+                  "AxesOrigin" -> {0, 0}, "ImageSize" -> {360, 360}, 
+                  "Axes" -> {True, True}, "LabelStyle" -> {}, "AspectRatio" -> 
+                  1, "DefaultStyle" -> {
+                    Directive[
+                    PointSize[0.011000000000000001`], 
+                    AbsoluteThickness[2], 
+                    RGBColor[0, 0, 1]]}, 
+                  "HighlightLabelingFunctions" -> <|
+                   "CoordinatesToolOptions" -> ({
+                    Identity[
+                    Part[#, 1]], 
+                    Identity[
+                    Part[#, 2]]}& ), 
+                    "ScalingFunctions" -> {{Identity, Identity}, {
+                    Identity, Identity}}|>, "Primitives" -> {}, "GCFlag" -> 
+                  False|>, 
+                "Meta" -> <|
+                 "DefaultHighlight" -> {"Dynamic", None}, "Index" -> {}, 
+                  "Function" -> ListPlot, "GroupHighlight" -> False|>|>]]& )[<|
+              "HighlightElements" -> <|
+                "Label" -> {"XYLabel"}, "Ball" -> {"IndicatedBall"}|>, 
+               "LayoutOptions" -> <|
+                "PanelPlotLayout" -> <||>, 
+                 "PlotRange" -> {{0., 60.}, {0., 60.}}, 
+                 "Frame" -> {{False, False}, {False, False}}, 
+                 "AxesOrigin" -> {0, 0}, "ImageSize" -> {360, 360}, 
+                 "Axes" -> {True, True}, "LabelStyle" -> {}, "AspectRatio" -> 
+                 1, "DefaultStyle" -> {
+                   Directive[
+                    PointSize[0.011000000000000001`], 
+                    AbsoluteThickness[2], 
+                    RGBColor[0, 0, 1]]}, 
+                 "HighlightLabelingFunctions" -> <|
+                  "CoordinatesToolOptions" -> ({
+                    Identity[
+                    Part[#, 1]], 
+                    Identity[
+                    Part[#, 2]]}& ), 
+                   "ScalingFunctions" -> {{Identity, Identity}, {
+                    Identity, Identity}}|>, "Primitives" -> {}, "GCFlag" -> 
+                 False|>, 
+               "Meta" -> <|
+                "DefaultHighlight" -> {"Dynamic", None}, "Index" -> {}, 
+                 "Function" -> ListPlot, "GroupHighlight" -> False|>|>],
+             ImageSizeCache->{{
+              4.503599627370496*^15, -4.503599627370496*^15}, {
+              4.503599627370496*^15, -4.503599627370496*^15}}],
+            Selectable->False]},
+          Annotation[{{
+             Annotation[{
+               Directive[
+                PointSize[0.011000000000000001`], 
+                AbsoluteThickness[2], 
+                RGBColor[0, 0, 1]], 
+               Point[CompressedData["
+1:eJxtk80OATEUhRsrSwtLCywsRCYIIgRjDON34xEk1l6hj+wRkH6nSW9MMvnS
+2+ntOaedzuN1f9acc7Pv+2N4qjywD1eBvmA8hVu4gwe+y+EJXlO6G1S9MPU9
+NOtdHWawDXuG41SHdMV+2q8LS+r49qXR894Ejpg/U2+l+7mL+V79+2lducT+
+Wif963Q+6qGfJ5+YywCqr/QNoc5T+SnfDVymfvyR8cTom8Mm1DlLxwJqvfwp
+J/lrwJnpp3PS/dK5cL+ib/ksoPybnOM+0qP9MjPmfsfc5UP5oC/61L1Xvsql
+91+f139R5R+gv0S2
+                "]]}, "Charting`Private`Tag#1"]}}, <|
+           "HighlightElements" -> <|
+             "Label" -> {"XYLabel"}, "Ball" -> {"IndicatedBall"}|>, 
+            "LayoutOptions" -> <|
+             "PanelPlotLayout" -> <||>, "PlotRange" -> {{0., 60.}, {0., 60.}},
+               "Frame" -> {{False, False}, {False, False}}, 
+              "AxesOrigin" -> {0, 0}, "ImageSize" -> {360, 360}, 
+              "Axes" -> {True, True}, "LabelStyle" -> {}, "AspectRatio" -> 1, 
+              "DefaultStyle" -> {
+                Directive[
+                 PointSize[0.011000000000000001`], 
+                 AbsoluteThickness[2], 
+                 RGBColor[0, 0, 1]]}, 
+              "HighlightLabelingFunctions" -> <|"CoordinatesToolOptions" -> ({
+                  Identity[
+                   Part[#, 1]], 
+                  Identity[
+                   Part[#, 2]]}& ), 
+                "ScalingFunctions" -> {{Identity, Identity}, {
+                  Identity, Identity}}|>, "Primitives" -> {}, "GCFlag" -> 
+              False|>, 
+            "Meta" -> <|
+             "DefaultHighlight" -> {"Dynamic", None}, "Index" -> {}, 
+              "Function" -> ListPlot, "GroupHighlight" -> False|>|>, 
+           "DynamicHighlight"]], {{}, {}}},
+        AspectRatio->1,
+        Axes->{True, True},
+        AxesLabel->{None, None},
+        AxesOrigin->{0, 0},
+        DisplayFunction->Identity,
+        Frame->{{False, False}, {False, False}},
+        FrameLabel->{{None, None}, {None, None}},
+        FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+        GridLines->{None, None},
+        GridLinesStyle->Directive[
+          GrayLevel[0.5, 0.4]],
+        Method->{
+         "AxisPadding" -> Scaled[0.02], "DefaultBoundaryStyle" -> Automatic, 
+          "DefaultGraphicsInteraction" -> {
+           "Version" -> 1.2, "TrackMousePosition" -> {True, False}, 
+            "Effects" -> {
+             "Highlight" -> {"ratio" -> 2}, 
+              "HighlightPoint" -> {"ratio" -> 2}, 
+              "Droplines" -> {
+               "freeformCursorMode" -> True, 
+                "placement" -> {"x" -> "All", "y" -> "None"}}}}, 
+          "DefaultMeshStyle" -> AbsolutePointSize[6], "DefaultPlotStyle" -> {
+            Directive[
+             RGBColor[0.368417, 0.506779, 0.709798], 
+             AbsoluteThickness[2]], 
+            Directive[
+             RGBColor[0.880722, 0.611041, 0.142051], 
+             AbsoluteThickness[2]], 
+            Directive[
+             RGBColor[0.560181, 0.691569, 0.194885], 
+             AbsoluteThickness[2]], 
+            Directive[
+             RGBColor[0.922526, 0.385626, 0.209179], 
+             AbsoluteThickness[2]], 
+            Directive[
+             RGBColor[0.528488, 0.470624, 0.701351], 
+             AbsoluteThickness[2]], 
+            Directive[
+             RGBColor[0.772079, 0.431554, 0.102387], 
+             AbsoluteThickness[2]], 
+            Directive[
+             RGBColor[0.363898, 0.618501, 0.782349], 
+             AbsoluteThickness[2]], 
+            Directive[
+             RGBColor[1, 0.75, 0], 
+             AbsoluteThickness[2]], 
+            Directive[
+             RGBColor[0.647624, 0.37816, 0.614037], 
+             AbsoluteThickness[2]], 
+            Directive[
+             RGBColor[0.571589, 0.586483, 0.], 
+             AbsoluteThickness[2]], 
+            Directive[
+             RGBColor[0.915, 0.3325, 0.2125], 
+             AbsoluteThickness[2]], 
+            Directive[
+             RGBColor[0.40082222609352647`, 0.5220066643438841, 0.85], 
+             AbsoluteThickness[2]], 
+            Directive[
+             RGBColor[
+             0.9728288904374106, 0.621644452187053, 0.07336199581899142], 
+             AbsoluteThickness[2]], 
+            Directive[
+             RGBColor[0, 2 - 3/GoldenRatio, 0], 
+             AbsoluteThickness[2]], 
+            Directive[
+             RGBColor[0.28026441037696703`, 0.715, 0.4292089322474965], 
+             AbsoluteThickness[2]]}, "DomainPadding" -> Scaled[0.02], 
+          "PointSizeFunction" -> "SmallPointSize", "RangePadding" -> 
+          Scaled[0.05], "OptimizePlotMarkers" -> True, "IncludeHighlighting" -> 
+          "CurrentPoint", "HighlightStyle" -> Automatic, 
+          "OptimizePlotMarkers" -> True, 
+          "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+              Identity[
+               Part[#, 1]], 
+              Identity[
+               Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+              Identity[
+               Part[#, 1]], 
+              Identity[
+               Part[#, 2]]}& )}},
+        PlotRange->{{0., 60.}, {0., 60.}},
+        PlotRangeClipping->True,
+        PlotRangePadding->{{0, 0}, {0, 0}},
+        Ticks->{Automatic, Automatic}], "]"}]},
+     {
+      DynamicBox[ToBoxes[
+        If[$CellContext`running$$, AppendTo[
+           $CellContext`plotData["humans"], 
+           Length[
+            Select[$CellContext`currentAgents$$, #["type"] == "human"& ]]]; 
+         AppendTo[
+           $CellContext`plotData["zombies"], 
+           Length[
+            Select[$CellContext`currentAgents$$, #["type"] == "zombie"& ]]]; 
+         AppendTo[$CellContext`infectionsPerStep, Length[
+             Select[$CellContext`currentAgents$$, #["type"] == "zombie"& ]]/
+           Length[$CellContext`currentAgents$$]]; AppendTo[
+           $CellContext`plotData["panicked"], 
+           Length[
+            Select[$CellContext`currentAgents$$, And[#["type"] == "human", 
+              #["panicked"]]& ]]]; With[{$CellContext`pos = Map[Floor[
+               #["pos"]]& , 
+              Select[$CellContext`currentAgents$$, #["type"] == "human"& ]]}, 
+           Increment[
+            Part[$CellContext`presenceMap, 
+             Part[$CellContext`pos, All, 1], 
+             Part[$CellContext`pos, All, 2]]]]], StandardForm],
+       ImageSizeCache->{
+        25.730859374999998`, {0.10283203125000018`, 8.072314453125}}]},
+     {
+      TagBox[GridBox[{
+         {"\<\"Humans:\"\>", 
+          TemplateBox[{
+            SliderBox[
+             Dynamic[$CellContext`numHumans$$], {1, 50, 1}], "\"  \"", 
+            DynamicBox[
+             ToBoxes[$CellContext`numHumans$$, StandardForm]]},
+           "RowDefault"]},
+         {"\<\"Zombies:\"\>", 
+          TemplateBox[{
+            SliderBox[
+             Dynamic[$CellContext`numZombies$$], {1, 20, 1}], "\"  \"", 
+            DynamicBox[
+             ToBoxes[$CellContext`numZombies$$, StandardForm]]},
+           "RowDefault"]},
+         {"\<\"Police:\"\>", 
+          TemplateBox[{
+            SliderBox[
+             Dynamic[$CellContext`numPolice$$], {1, 10, 1}], "\"  \"", 
+            DynamicBox[
+             ToBoxes[$CellContext`numPolice$$, StandardForm]]},
+           "RowDefault"]},
+         {"\<\"Weapons:\"\>", 
+          TemplateBox[{
+            SliderBox[
+             Dynamic[$CellContext`numWeapons$$], {1, 10, 1}], "\"  \"", 
+            DynamicBox[
+             ToBoxes[$CellContext`numWeapons$$, StandardForm]]},
+           "RowDefault"]},
+         {"\<\"Police Bullets:\"\>", 
+          TemplateBox[{
+            SliderBox[
+             Dynamic[$CellContext`policeBullets$$], {1, 30, 1}], "\"  \"", 
+            DynamicBox[
+             ToBoxes[$CellContext`policeBullets$$, StandardForm]]},
+           "RowDefault"]},
+         {"\<\"Infection Rate:\"\>", 
+          TemplateBox[{
+            SliderBox[
+             Dynamic[$CellContext`infection$$], {0, 1, 0.1}], "\"  \"", 
+            DynamicBox[
+             ToBoxes[$CellContext`infection$$, StandardForm]]},
+           "RowDefault"]},
+         {"\<\"Movement Rate:\"\>", 
+          TemplateBox[{
+            SliderBox[
+             Dynamic[$CellContext`movement$$], {0, 1, 0.1}], "\"  \"", 
+            DynamicBox[
+             ToBoxes[$CellContext`movement$$, StandardForm]]},
+           "RowDefault"]}
+        },
+        AutoDelete->False,
+        GridBoxAlignment->{"Columns" -> {{Left}}},
+        GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+        GridBoxSpacings->{"Columns" -> {{2}}, "Rows" -> {{1}}}],
+       "Grid"]},
+     {
+      TemplateBox[{
+        ButtonBox[
+        "\"Reset\"", 
+         ButtonFunction :> ($CellContext`plotData[
+            "humans"] = {}; $CellContext`plotData[
+            "zombies"] = {}; $CellContext`plotData[
+            "panicked"] = {}; $CellContext`weapons$$ = 
+           Table[<|"pos" -> RandomInteger[{1, $CellContext`gridSize$$}, 2], 
+              "taken" -> 
+              False|>, {$CellContext`numWeapons$$}]; \
+$CellContext`currentAgents$$ = Join[
+             
+             Table[<|"type" -> "human", "pos" -> 
+               RandomInteger[{1, $CellContext`gridSize$$}, 2], "courage" -> 
+               RandomReal[], "armed" -> False, "panicked" -> 
+               False|>, {$CellContext`numHumans$$}], 
+             
+             Table[<|"type" -> "zombie", "pos" -> 
+               RandomInteger[{1, $CellContext`gridSize$$}, 
+                 2]|>, {$CellContext`numZombies$$}], 
+             
+             Table[<|"type" -> "police", "pos" -> 
+               RandomInteger[{1, $CellContext`gridSize$$}, 2], 
+               "bullets" -> $CellContext`policeBullets$$|>, \
+{$CellContext`numPolice$$}]]; $CellContext`shootTimers$$ = 
+           ConstantArray[
+            0, $CellContext`numPolice$$]; $CellContext`exitTimer$$ = 0), 
+         Appearance -> Automatic, Evaluator -> Automatic, Method -> 
+         "Preemptive"], 
+        ButtonBox[
+         DynamicBox[
+          ToBoxes[
+           If[$CellContext`running$$, "Stop", "Start"], StandardForm], 
+          ImageSizeCache -> {
+           16.72998046875, {0.09492187499999982, 5.76650390625}}], Appearance -> 
+         Automatic, 
+         ButtonFunction :> ($CellContext`running$$ = 
+          Not[$CellContext`running$$]), Evaluator -> Automatic, Method -> 
+         "Preemptive"]},
+       "RowDefault"]},
+     {
+      DynamicBox[ToBoxes[
+       If[$CellContext`running$$, {$CellContext`currentAgents$$, \
+$CellContext`shootTimers$$} = \
+$CellContext`zombieStep[$CellContext`currentAgents$$, \
+$CellContext`shootTimers$$, $CellContext`infection$$, \
+$CellContext`movement$$]; Increment[$CellContext`step$$]]; Graphics[{
+           PointSize[0.02], {Black, 
+            
+            Rectangle[$CellContext`exitPoint$$ - {0.5, 
+             0.5}, $CellContext`exitPoint$$ + {0.5, 0.5}]}, {Orange, 
+            Map[Point[
+              #["pos"]]& , 
+             Select[$CellContext`weapons$$, Not[
+               #["taken"]]& ]]}, {Green, 
+            Map[Point[
+              #["pos"]]& , 
+             Select[$CellContext`currentAgents$$, And[#["type"] == "human", 
+               Not[
+                #["armed"]], 
+               Not[
+                #["panicked"]]]& ]]}, {Gray, 
+            Map[Point[
+              #["pos"]]& , 
+             Select[$CellContext`currentAgents$$, And[#["type"] == "human", 
+               Not[
+                #["armed"]], 
+               #["panicked"]]& ]]}, {
+            Darker[Green], 
+            Map[Point[
+              #["pos"]]& , 
+             Select[$CellContext`currentAgents$$, And[#["type"] == "human", 
+               #["armed"]]& ]]}, {Red, 
+            Map[Point[
+              #["pos"]]& , 
+             
+             Select[$CellContext`currentAgents$$, #["type"] == 
+              "zombie"& ]]}, {Blue, 
+            Map[Point[
+              #["pos"]]& , 
+             Select[$CellContext`currentAgents$$, #["type"] == "police"& ]]}},
+           PlotRange -> {{0, $CellContext`gridSize$$ + 1}, {
+            0, $CellContext`gridSize$$ + 1}}, Frame -> True], StandardForm],
+       ImageSizeCache->{162., {78.4535888671875, 83.6123291015625}},
+       UpdateInterval->0.01]}
+    },
+    DefaultBaseStyle->"Column",
+    GridBoxAlignment->{"Columns" -> {{Left}}},
+    GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+   "Column"],
+  DynamicModuleValues:>{}]], "Output",
+ CellChangeTimes->{3.9427397116565876`*^9, 3.942739810532009*^9, 
+  3.9427399690286217`*^9, 3.9427401275798264`*^9},
+ CellLabel->
+  "Out[129]=",ExpressionUUID->"625cab64-6c1a-2b42-9dda-ef66084f11eb"]
+}, Open  ]],
+
+Cell[BoxData[" "], "Input",
+ CellChangeTimes->{
+  3.9426084810186634`*^9},ExpressionUUID->"ebf0bebd-47a6-844e-ba60-\
+90958603ca61"]
+},
+WindowSize->{1152, 592.8},
+WindowMargins->{{1146.6, Automatic}, {Automatic, -5.3999999999999995`}},
+Magnification:>0.9 Inherited,
+FrontEndVersion->"14.1 for Microsoft Windows (64-bit) (July 16, 2024)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"6e7c72bf-1a1b-804e-88db-ce1b9c20a785"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[576, 22, 56779, 1297, 2491, "Input",ExpressionUUID->"d63a3396-4595-3841-8d33-c8d19564cd8e"],
+Cell[57358, 1321, 25616, 543, 984, "Output",ExpressionUUID->"625cab64-6c1a-2b42-9dda-ef66084f11eb"]
+}, Open  ]],
+Cell[82989, 1867, 131, 3, 25, "Input",ExpressionUUID->"ebf0bebd-47a6-844e-ba60-90958603ca61"]
+}
+]
+*)
+
