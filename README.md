@@ -1,4 +1,4 @@
-The submission was done in 3 different files for convenience and cleanliness of the code
+The submission was done in 3 different files for convenience and cleanliness of the code. *All files are part of the submission*
 
 Simulate_iteration_notebook = The iterative writing of the simulation increasingly more complex
 
